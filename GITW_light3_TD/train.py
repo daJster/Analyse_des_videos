@@ -68,7 +68,7 @@ class CustomDataset(Dataset):
                 
 
                 # Find the corresponding saliency map using nframe
-                saliency_map_files = sorted(os.listdir(saliency_path))
+                saliency_map_files = [map_file for map_file in sorted(os.listdir(saliency_path)) if map_file.endswith("png")]
                 saliency_map_file = saliency_map_files[nframe - 1]
                 saliency_map_path = os.path.join(saliency_path, saliency_map_file)
 
@@ -134,6 +134,7 @@ def get_dataset(data_dir):
     for i, image in enumerate(list_all_frames):
         resized_images[i][:image.shape[0], :image.shape[1], :] = image
         
+    save_image(torch.tensor(resized_images, dtype=torch.float32), f'output/test-{idx}.jpg')
     # Convert resized_images to PyTorch tensors
     resized_tensors = torch.stack(torch.tensor(image.transpose(2, 0, 1), dtype=torch.float32) for image in resized_images)
     classes_tensor = torch.tensor(list_all_types, dtype=torch.long)
@@ -145,7 +146,7 @@ def get_dataset(data_dir):
 
 def main():
     train_dataset, val_dataset = get_dataset('train'), get_dataset('test')
-    
+    print('check')
     batch_size = 32
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
@@ -204,7 +205,7 @@ def save_frames(frames):
     
     list_frames = []
     for frame_idx, frame in enumerate(frames):
-        print(frame_idx, end="\r")
+        # print(frame_idx, end="\r")
         # Convert torch tensor to NumPy array
         numpy_array = (frame.permute(1, 2, 0).cpu().numpy() * 255).astype('uint8')
 
@@ -254,9 +255,9 @@ def merge_videos(input_dir, output_path):
             
 if __name__ == "__main__":
     main()
-    input_directory = 'train_dataset'
-    output_video_path = 'merged_video.mp4'
-    merge_videos(input_directory, output_video_path)
+    # input_directory = 'train_dataset'
+    # output_video_path = 'merged_video.mp4'
+    # merge_videos(input_directory, output_video_path)
     # ADD CODECARBON
     # data_dir = './train'
     # dataset = CustomDataset(data_dir)
